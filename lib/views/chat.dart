@@ -1,5 +1,8 @@
+import 'package:oui_chat/services/chat/chat_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:oui_chat/components/chat_bubble.dart';
 
 class ChatView extends StatefulWidget {
   final String receiverUserEmail;
@@ -12,15 +15,20 @@ class ChatView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ChatViewState createState() => _ChatViewState();
+  State<ChatView> createState() => _ChatViewState();
 }
 
 class _ChatViewState extends State<ChatView> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
+  final ChatService _chatService = ChatService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-  void sendMessage() {
-    // Implement sending message logic here
+
+  void sendMessage() async{
+    if(_messageController.text.isNotEmpty){
+      await _chatService.sendMessage(
+        widget.receiverUserID, _messageController.text);
+    }
   }
 
   @override
@@ -34,34 +42,37 @@ class _ChatViewState extends State<ChatView> {
 
           // User input
           _buildMessageInput(),
+
+          const SizedBox(height: 25),
         ],
       ),
     );
   }
 
-  // Build message list
   Widget _buildMessageList() {
     return StreamBuilder<QuerySnapshot>(
-      // Implement your stream logic here
+      stream: _chatService.getMessages(
+        widget.receiverUserID,
+        _firebaseAuth.currentUser!.uid,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text('Error');
+          return Text('Error: ${snapshot.error}');
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text('Loading...');
         }
 
-        return ListView.builder(
-          // Implement your ListView builder here
-          itemCount: snapshot.data!.docs.length,
-          itemBuilder: (context, index) {
-            return _buildMessageItem(snapshot.data!.docs[index]);
-          },
+        return ListView(
+          children: snapshot.data!.docs
+              .map((document) => _buildMessageItem(document))
+              .toList(),
         );
       },
     );
   }
+
 
   // Build message item
   Widget _buildMessageItem(DocumentSnapshot document) {
@@ -77,16 +88,17 @@ class _ChatViewState extends State<ChatView> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: (data['senderId'] == widget.receiverUserID)
+          crossAxisAlignment:
+            (data['senderId'] == _firebaseAuth.currentUser!.uid)
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
-          mainAxisAlignment: (data['senderId'] == widget.receiverUserID)
+          mainAxisAlignment:
+            (data['senderId'] == _firebaseAuth.currentUser!.uid)
               ? MainAxisAlignment.end
               : MainAxisAlignment.start,
           children: [
             Text(data['senderEmail']),
-            const SizedBox(height: 5),
-            Text(data['message']),
+            ChatBubble(message: data['message']),
           ],
         ),
       ),
@@ -95,21 +107,28 @@ class _ChatViewState extends State<ChatView> {
 
   // Build message input
   Widget _buildMessageInput() {
-    return Row(
-      children: [
-        Expanded(
-          child: TextField(
-            controller: _messageController,
-            decoration: const InputDecoration(
-              hintText: 'Type your message...',
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: const InputDecoration(
+                hintText: 'Type your message...',
+              ),
             ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.send),
-          onPressed: sendMessage,
-        ),
-      ],
+          IconButton(
+            onPressed: sendMessage,
+            icon: const Icon(
+              Icons.arrow_upward,
+              size: 40,
+            ),
+          ),
+        ], // Ajout de la fermeture du widget Row
+      ),
     );
   }
+
 }

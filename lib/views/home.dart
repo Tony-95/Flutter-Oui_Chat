@@ -51,9 +51,9 @@ class _HomeViewState extends State<HomeView> {
         }
 
         return ListView(
-          children: snapshot.data!.docs.map<Widget>((doc) {
-            return _buildUserListItem(doc);
-          }).toList(),
+          children: snapshot.data!.docs
+              .map<Widget>((doc) => _buildUserListItem(doc))
+              .toList(),
         );
       },
     );
