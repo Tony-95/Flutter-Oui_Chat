@@ -22,12 +22,12 @@ class ChampText extends StatelessWidget {
           borderSide: BorderSide(color: Colors.grey.shade200),
         ), // OutlineInputBorder
         focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
+          borderSide: BorderSide(color: Colors.black),
         ), // OutlineInputBorder
         fillColor: Colors.grey[100],
         filled: true,
         hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.white),
+        hintStyle: const TextStyle(color: Colors.black),
       ), // InputDecoration
     ); // TextField
   }

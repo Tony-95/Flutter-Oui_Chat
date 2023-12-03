@@ -45,17 +45,40 @@ class _LoginViewState extends State<LoginView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const SizedBox(height: 50),
+                // Logo messagerie
+                Icon(
+                  Icons.message,
+                  size: 100,
+                  color: Colors.grey[800],
+                ),
+                const SizedBox(height: 20), // Espacement
+                // Message de création de compte
+                const Text(
+                  "Let's create an account for you!",
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 20), // Espacement
+                // Champ de saisie pour l'email
+                ChampText(
+                  controller: emailController,
+                  hintText: 'Email',
+                  obscureText: false,
+                ),
+                const SizedBox(height: 20), // Espacement
+                // Champ de saisie pour le mot de passe
                 ChampText(
                   controller: passwordController,
                   hintText: 'Password',
                   obscureText: true,
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: 20), // Espacement
+                // Bouton de connexion
                 Bouton(
                   onTap: signIn,
                   text: "Sign In",
                 ),
                 const SizedBox(height: 50),
+                // Texte pour s'inscrire
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -78,5 +101,3 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 }
-
-
